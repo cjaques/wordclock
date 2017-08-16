@@ -16,8 +16,7 @@ You just need the Arduino IDE and the Pololuled library.
 
 ## Ackowledgment
 
-* The project originated from the [***FabLab*** in Neuchatel](http://fablab-neuch.ch/)
-* A big shout out to the creators and maintainers of FluidSynth
+* Thanks a lot to the [***FabLab*** in Neuchatel](http://fablab-neuch.ch/) for their most precious help.
 
 ## License
 
