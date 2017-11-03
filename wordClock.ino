@@ -27,6 +27,8 @@ int button1 = 10;
 int button2 = 12;
 int button1_state = 0;
 int button2_state = 0;
+int m_biere=0;
+bool button_pressed=false;
 
 
 // =======================================================    SETUP
@@ -36,7 +38,7 @@ void setup()
 //  if (! rtc.isrunning()) {
 //    Serial.println("RTC is NOT running!");}
   Wire.begin();
-//  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   
   pinMode(button1,INPUT);
   pinMode(button2,INPUT);
@@ -59,6 +61,7 @@ void loop()
     {
       button1_state = 1;
       // change time here
+      button_pressed = true;
       add_5min(now);
     }
   }
@@ -71,6 +74,7 @@ void loop()
     if(button2_state == 0)
     {
       button2_state = 1;
+      button_pressed = true;
       // change time here
       subtract_5min(now); 
     }
@@ -161,36 +165,42 @@ void subtract_5min(DateTime in){
 void translateTime(DateTime in){
   int h = in.hour();
   int m = in.minute();
-
-//  // DEBUG print time
-//  Serial.print(h);Serial.print("  ");Serial.print(m);
-//  Serial.println();
-
-  
-  // reset colors
-  memset(colors,0,LED_COUNT*(3*sizeof(unsigned char)));
-//  for (int i=0;i++;i<LED_COUNT)
-//    colors[i] = off;
-  
-
-  // Il est
-  colors[0]=colors[1]=normal_strong;
-  colors[3]=colors[4]=colors[5]=normal;
-  // chez les waltrr
-  colors[127]=colors[126]=colors[125]=colors[123]=colors[122]=colors[121]=colors[120]=blueish;
-  colors[132]=colors[133]=colors[134]=colors[135]=colors[136]=colors[137]=blueish;
-  // Jade
-  //colors[128]=colors[129]=colors[130]=colors[131]=rose;
-  // Louise
-  //colors[138]=colors[139]=colors[140]=colors[141]=colors[142]=colors[143]=rose;
-
   if(m >= 33)
     h += 1;
-    
+
+  // reset colors
+  memset(colors,0,LED_COUNT*(3*sizeof(unsigned char)));
+
+  // Print Time      
   printHours(h);
   printMinutes(m);
+
+  // Print il est ... chez ...
+  colors[0]=colors[1]=normal_strong; // il
+  colors[3]=colors[4]=colors[5]=normal; // est
+  if(h%3 == 0){ // chez les waltrr
+    colors[127]=colors[126]=colors[125]=colors[123]=colors[122]=colors[121]=colors[120]=blueish;
+    colors[132]=colors[133]=colors[134]=colors[135]=colors[136]=colors[137]=blueish;
+  }
+  else if(h%3 == 1){
+    // chez Jade
+    colors[120]=colors[121]=colors[122]=colors[123]=rose;
+    colors[128]=colors[129]=colors[130]=colors[131]=rose;
+  }
+  else{
+    // chez Louise
+    colors[120]=colors[121]=colors[122]=colors[123]=rose;
+    colors[138]=colors[139]=colors[140]=colors[141]=colors[142]=colors[143]=rose;  
+  }
   
- 
+
+  // Animation BIERE
+  if(h >= 15){
+    if(m != m_biere && m % 10 == 0){ // && button_pressed == false){
+      animBiere();
+      m_biere = m;
+    }
+  } 
 }
 
 void printMinutes(int m){
@@ -348,7 +358,25 @@ void printHours(int h){
       break;
   }
 }
-
+// =======================================================    ANIM BIERE
+void animBiere(){ 
+  int LED_B = 5;
+  int Biere0 = 117;
+  byte time;
+  int Count = 1000;
+  
+  for(int i=0;i<Count;i++){
+    // gives this nice waving pattern 
+    time = millis() >> 2;
+    for(uint16_t i = 0; i < LED_B; i++)
+    {
+      byte x = time - 8*i;
+      colors[Biere0-i] = (rgb_color){ x, 255 - x, 255 - x };
+    }
+    // actually send color to strip
+    ledStrip.write(colors, LED_COUNT);  
+  }
+}
 // =======================================================    ANIM JADE
 void animJade(){ 
   int LED_J = 4;
