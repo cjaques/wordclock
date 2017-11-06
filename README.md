@@ -1,9 +1,7 @@
 # Wordclock
 Code for yet another wordclock, that one isn't generic though.
 Made as a gift for friends, it holds names and specifics... Anyhow, feel free to contact me in case you'd like to use the code and need help.
-<a href="url"><img src="http://christianjaques.ch/wp-content/uploads/2017/11/IMG_3148.jpg" align="left" height="800" width="600" ></a>
-![word clock](  width="700" height="800")
-"Final assembly of the clock"
+<a href="url"><img src="http://christianjaques.ch/wp-content/uploads/2017/11/IMG_3148.jpg" align="left" height="400" width="300" ></a>
 
 ## Assembly
 That should come... I'll give the design of the mechanic parts too.
