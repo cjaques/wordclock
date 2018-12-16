@@ -1,10 +1,10 @@
-/* LedStripGradient: Example Arduino sketch that shows
- * how to control an Addressable RGB LED Strip from Pololu.
- *
- * To use this, you will need to plug an Addressable RGB LED
- * strip from Pololu into pin 12.  After uploading the sketch,
- * you should see a pattern on the LED strip that fades from
- * green to pink and also moves along the strip.
+/* Walti-Word Clock
+ *  
+ * Copyright C. Jaques, christian.jaques@gmail.com, December 2018
+ * 
+ * Word clock code.  
+ * Reading time from RTC_DS1307 and setting up according LEDs on the WS2812B ledstrip, through Pololuled library.
+ * Also check for user input through buttons to update displayed time.
  */
  
 #include "PololuLedStrip.h"
@@ -27,21 +27,22 @@ int button1 = 10;
 int button2 = 12;
 int button1_state = 0;
 int button2_state = 0;
-int m_biere=0;
-bool button_pressed=false;
+int m_biere = -1;
+int m_button_pressed = -1;
 
+// debug flag
+bool DEBUG = false;
 
 // =======================================================    SETUP
 void setup()
 {    
-//  
-//  if (! rtc.isrunning()) {
-//    Serial.println("RTC is NOT running!");}
   Wire.begin();
   rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   
   pinMode(button1,INPUT);
   pinMode(button2,INPUT);
+
+  // nice initial animation 
 }
 
 // =======================================================    VARS
@@ -61,7 +62,6 @@ void loop()
     {
       button1_state = 1;
       // change time here
-      button_pressed = true;
       add_5min(now);
     }
   }
@@ -74,7 +74,6 @@ void loop()
     if(button2_state == 0)
     {
       button2_state = 1;
-      button_pressed = true;
       // change time here
       subtract_5min(now); 
     }
@@ -93,9 +92,7 @@ void loop()
   // send colors to strip
   ledStrip.write(colors, LED_COUNT);  
    
-  delay(20);
-//  Serial.println();
-  
+  delay(20);  
 }
 
 
@@ -113,10 +110,14 @@ void add_5min(DateTime in){
   int m = in.minute();
   int h = in.hour();
   int diff = 5-(m+5)%5;
-  Serial.print("m was : ");
-  Serial.print(m);
-  Serial.print("  h was : ");
-  Serial.print(h);
+  
+  if(DEBUG){
+    Serial.print("m was : ");
+    Serial.print(m);
+    Serial.print("  h was : ");
+    Serial.print(h);
+    Serial.println();
+  }
   
   m = m+diff;
   if(m >= 60)
@@ -126,11 +127,19 @@ void add_5min(DateTime in){
   }
     
   m = m%60;
-  Serial.print("   new m : ");
-  Serial.print(m);
-  Serial.print("    new h : ");
-  Serial.print(h);
 
+  if(DEBUG){
+    Serial.print("   new m : ");
+    Serial.print(m);
+    Serial.print("    new h : ");
+    Serial.print(h);
+    Serial.println();
+  }
+
+  // note minute of last button press to disable animations for 2 minutes after that
+  m_button_pressed = m;
+
+  // adjust RTC time
   rtc.adjust(DateTime(2017,06,01,h,m,0));
 }
 
@@ -151,12 +160,18 @@ void subtract_5min(DateTime in){
       h = 23;
   }
     
+  if(DEBUG){
+    Serial.print("   new m : ");
+    Serial.print(m);
+    Serial.print("    new h : ");
+    Serial.print(h);
+    Serial.println();
+  }
   
-  Serial.print("   new m : ");
-  Serial.print(m);
-  Serial.print("    new h : ");
-  Serial.print(h);
+  // note minute of last button press to disable animations for 2 minutes after that
+  m_button_pressed = m;
 
+  // adjust RTC time
   rtc.adjust(DateTime(2017,06,01,h,m,0));
 }
 
@@ -195,12 +210,16 @@ void translateTime(DateTime in){
   
 
   // Animation BIERE
-  if(h >= 15){
-    if(m != m_biere && m % 10 == 0){ // && button_pressed == false){
-      animBiere();
-      m_biere = m;
+  if(h >= 15){ // 3pm is a "buvable" time...
+    if( m != m_biere && // don't display the animation multiple times
+        m % 10 == 0 && // is it the right time for the animation ? 
+        m != m_button_pressed ){ // was a button pressed just now ? 
+        animBiere();
+        m_biere = m;
+        m_button_pressed = -1;
+      }
     }
-  } 
+  
 }
 
 void printMinutes(int m){
@@ -396,7 +415,7 @@ void animJade(){
     ledStrip.write(colors, LED_COUNT);  
   }
 }
-// =======================================================    ANIM LOUISE
+// =======================================================    ANIM LOULOU
 void animLouise(){ 
   int LED_J = 6;
   int J0 = 138;

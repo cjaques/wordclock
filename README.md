@@ -10,7 +10,8 @@ Watch out, the dimensions are not set, so you need to set them within the laser-
 
 ### Parts list
 * Arduino Leonardo
-* LedStrip --> I used [this one](https://www.aliexpress.com/snapshot/0.html?spm=a2g0s.9042647.6.2.WLVHRD&orderId=81806470273053&productId=1592593512)
+* LedStrip : I used [this one](https://www.aliexpress.com/snapshot/0.html?spm=a2g0s.9042647.6.2.WLVHRD&orderId=81806470273053&productId=1592593512)
+* Real Time Clock : [Seed Studio RTC](http://wiki.seeedstudio.com/Grove-RTC/)
 * ...
 
 ## Dependencies
