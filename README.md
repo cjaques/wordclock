@@ -23,4 +23,4 @@ Thanks a lot to the [***FabLab*** in Neuchatel](http://fablab-neuch.ch/) for the
 
 ## License
 
-You are free to use and modify the code here, just know that it comes as is and there's NO WARRANTY
+See the [LICENSE](https://github.com/cjaques/wordclock/blob/master/LICENSE) file, MIT license. Basically you are free to use everything in this repo as much as you want, as long as you respect copyright and know that all you are finding here comes as is and with no warranty.
