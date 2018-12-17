@@ -15,12 +15,16 @@
 // Real time clock
 RTC_DS1307 rtc;
 
+// store current time, updated at each loop
+DateTime now;
+
 // Create an ledStrip object and specify the pin it will use.
 PololuLedStrip<7> ledStrip;
 
 // Create a buffer for holding the colors (3 bytes per color).
 #define LED_COUNT 144
 rgb_color colors[LED_COUNT];
+rgb_color colors_old[LED_COUNT];
 
 // inputs for buttons
 int button1 = 10;
@@ -33,6 +37,9 @@ int m_button_pressed = -1;
 // debug flag
 bool DEBUG = false;
 
+// misc
+int i;
+
 // =======================================================    SETUP
 void setup()
 {    
@@ -44,9 +51,6 @@ void setup()
 
   // nice initial animation 
 }
-
-// =======================================================    VARS
-DateTime now;
 
 
 // =======================================================    MAIN LOOP
@@ -89,9 +93,16 @@ void loop()
   // will directly update colors
   translateTime(now);
 
-  // send colors to strip
-  ledStrip.write(colors, LED_COUNT);  
-   
+  // send colors to strip if they changed
+  if(colors_changed()){
+     // reset colors
+    memset(colors,0,LED_COUNT*(3*sizeof(unsigned char)));
+    // send colors to strip
+    ledStrip.write(colors, LED_COUNT);    
+    // update colors_old
+    update_colors_old();
+  }
+  // wait a bit
   delay(20);  
 }
 
@@ -103,6 +114,25 @@ rgb_color off =       (rgb_color){ 0, 0, 0 };
 rgb_color rose  =      (rgb_color){200, 30, 30};
 rgb_color blueish  =      (rgb_color){10, 30, 150};
 
+
+// =======================================================    COLORS CHANGED
+bool ret = false;
+bool colors_changed(){
+  ret = true;
+  for(i=0; i<LED_COUNT; i++){
+    ret = ret && (colors_old[i].red == colors[i].red) 
+              && (colors_old[i].green == colors[i].green) 
+              && (colors_old[i].blue == colors[i].blue);
+  }
+  return ret;
+}
+
+// =======================================================    UPDATE COLORS_OLD
+void update_colors_old(){
+  for(i=0; i<LED_COUNT; i++){
+    colors_old[i] = colors[i];
+  }
+}
 
 // =======================================================    ADJUST TIME
 void add_5min(DateTime in){
@@ -183,8 +213,7 @@ void translateTime(DateTime in){
   if(m >= 33)
     h += 1;
 
-  // reset colors
-  memset(colors,0,LED_COUNT*(3*sizeof(unsigned char)));
+ 
 
   // Print Time      
   printHours(h);
@@ -378,18 +407,21 @@ void printHours(int h){
   }
 }
 // =======================================================    ANIM BIERE
-void animBiere(){ 
-  int LED_B = 5;
-  int Biere0 = 117;
-  byte time;
-  int Count = 1000;
+byte x; 
+int LED_B = 5;
+int Biere0 = 117;
+byte time;
+int Count = 1000;
   
-  for(int i=0;i<Count;i++){
+void animBiere(){ 
+
+  
+  for(i=0;i<Count;i++){
     // gives this nice waving pattern 
     time = millis() >> 2;
     for(uint16_t i = 0; i < LED_B; i++)
     {
-      byte x = time - 8*i;
+      x = time - 8*i;
       colors[Biere0-i] = (rgb_color){ x, 255 - x, 255 - x };
     }
     // actually send color to strip
@@ -397,16 +429,14 @@ void animBiere(){
   }
 }
 // =======================================================    ANIM JADE
-void animJade(){ 
-  int LED_J = 4;
-  int J0 = 128;
-  byte time;
-  int Count = 1000;
-  
-  for(int i=0;i<Count;i++){
+int LED_J = 4;
+int J0 = 128;
+
+void animJade(){   
+  for(i=0;i<Count;i++){
     // gives this nice waving pattern 
     time = millis() >> 2;
-    for(uint16_t i = 0; i < LED_J; i++)
+    for(i = 0; i < LED_J; i++)
     {
       byte x = time - 8*i;
       colors[J0+i] = (rgb_color){ x, 255 - x, x };
@@ -416,19 +446,16 @@ void animJade(){
   }
 }
 // =======================================================    ANIM LOULOU
+int LED_L = 6;
+  int L0 = 138;
 void animLouise(){ 
-  int LED_J = 6;
-  int J0 = 138;
-  byte time;
-  int Count = 1000;
-  
   for(int i=0;i<Count;i++){
     // gives this nice waving pattern 
     time = millis() >> 2;
-    for(uint16_t i = 0; i < LED_J; i++)
+    for(i = 0; i < LED_L; i++)
     {
       byte x = time - 8*i;
-      colors[J0+i] = (rgb_color){ x, 255 - x, x };
+      colors[L0+i] = (rgb_color){ x, 255 - x, x };
     }
     // actually send color to strip
     ledStrip.write(colors, LED_COUNT);  
