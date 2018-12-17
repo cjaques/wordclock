@@ -1,4 +1,5 @@
-/* Walti-Word Clock
+/* 
+ *  Walti-Word Clock
  *  
  * Copyright C. Jaques, christian.jaques@gmail.com, December 2018
  * 
@@ -50,6 +51,7 @@ void setup()
   pinMode(button2,INPUT);
 
   // nice initial animation 
+  startup_animation();
 }
 
 
@@ -73,8 +75,8 @@ void loop()
   {
     button1_state = 0;
   }
-   if(digitalRead(button2) == HIGH)
-   {
+  if(digitalRead(button2) == HIGH)
+  {
     if(button2_state == 0)
     {
       button2_state = 1;
@@ -95,15 +97,14 @@ void loop()
 
   // send colors to strip if they changed
   if(colors_changed()){
-     // reset colors
-    memset(colors,0,LED_COUNT*(3*sizeof(unsigned char)));
+     
     // send colors to strip
     ledStrip.write(colors, LED_COUNT);    
     // update colors_old
     update_colors_old();
   }
   // wait a bit
-  delay(20);  
+  delay(50);
 }
 
 
@@ -124,13 +125,21 @@ bool colors_changed(){
               && (colors_old[i].green == colors[i].green) 
               && (colors_old[i].blue == colors[i].blue);
   }
-  return ret;
+
+//  if(DEBUG){
+//    Serial.print("Colors changed ");
+//    Serial.print(ret);
+//    Serial.println();
+//  }
+  return !ret;
 }
 
 // =======================================================    UPDATE COLORS_OLD
 void update_colors_old(){
   for(i=0; i<LED_COUNT; i++){
-    colors_old[i] = colors[i];
+    colors_old[i].red = colors[i].red;
+    colors_old[i].green = colors[i].green;
+    colors_old[i].blue = colors[i].blue;
   }
 }
 
@@ -166,7 +175,7 @@ void add_5min(DateTime in){
     Serial.println();
   }
 
-  // note minute of last button press to disable animations for 2 minutes after that
+  // note minute of last button press to disable animations
   m_button_pressed = m;
 
   // adjust RTC time
@@ -208,6 +217,10 @@ void subtract_5min(DateTime in){
 
 // =======================================================    TRANSLATE TIME
 void translateTime(DateTime in){
+
+  // reset colors
+  memset(colors,0,LED_COUNT*(3*sizeof(unsigned char)));
+  
   int h = in.hour();
   int m = in.minute();
   if(m >= 33)
@@ -243,9 +256,15 @@ void translateTime(DateTime in){
     if( m != m_biere && // don't display the animation multiple times
         m % 10 == 0 && // is it the right time for the animation ? 
         m != m_button_pressed ){ // was a button pressed just now ? 
-        animBiere();
-        m_biere = m;
-        m_button_pressed = -1;
+          if(DEBUG){
+            Serial.print("Animation going ");
+            Serial.print(m);
+            Serial.print(m_biere);
+            Serial.println();
+          }
+          animBiere();
+          m_biere = m;
+          m_button_pressed = -1;
       }
     }
   
@@ -406,6 +425,7 @@ void printHours(int h){
       break;
   }
 }
+
 // =======================================================    ANIM BIERE
 byte x; 
 int LED_B = 5;
@@ -413,9 +433,7 @@ int Biere0 = 117;
 byte time;
 int Count = 1000;
   
-void animBiere(){ 
-
-  
+void animBiere(){   
   for(i=0;i<Count;i++){
     // gives this nice waving pattern 
     time = millis() >> 2;
@@ -428,6 +446,22 @@ void animBiere(){
     ledStrip.write(colors, LED_COUNT);  
   }
 }
+
+// =======================================================    ANIM STARTUP
+void startup_animation(){   
+  for(i=0;i<600;i++){
+    // gives this nice blueish waving pattern 
+    time = millis() >> 2;
+    for(int j = 0; j < LED_COUNT; j++)
+    {
+      x = time - 8*j;
+      colors[j] = (rgb_color){ 0, 255 - x, 255 - x };
+    }
+    // actually send color to strip
+    ledStrip.write(colors, LED_COUNT);  
+  }
+}
+
 // =======================================================    ANIM JADE
 int LED_J = 4;
 int J0 = 128;
@@ -445,6 +479,7 @@ void animJade(){
     ledStrip.write(colors, LED_COUNT);  
   }
 }
+
 // =======================================================    ANIM LOULOU
 int LED_L = 6;
   int L0 = 138;
